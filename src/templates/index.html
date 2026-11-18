@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Monitoring Dashboard</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header>
+    <h1>🛡 SOC Monitoring Dashboard</h1>
+    <p>AI-Powered Threat Detection & Incident Response Platform</p>
+</header>
+
+<main>
+
+    <section class="stats">
+
+        <div class="card">
+            <h3>Total Incidents</h3>
+            <h2>{{ total }}</h2>
+        </div>
+
+        <div class="card critical">
+            <h3>Critical Alerts</h3>
+            <h2>{{ critical }}</h2>
+        </div>
+
+        <div class="card open">
+            <h3>Open Incidents</h3>
+            <h2>{{ open_count }}</h2>
+        </div>
+
+        <div class="card resolved">
+            <h3>Resolved Incidents</h3>
+            <h2>{{ resolved }}</h2>
+        </div>
+
+    </section>
+
+    <h2>Security Incident Records</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="message {{ category }}">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="table-container">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Source IP</th>
+                    <th>Threat</th>
+                    <th>Severity</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for incident in incidents %}
+                <tr>
+                    <td>{{ incident["incident_id"] }}</td>
+                    <td>{{ incident["username"] or "-" }}</td>
+                    <td>{{ incident["source_ip"] or "-" }}</td>
+                    <td>{{ incident["threat_category"] or "-" }}</td>
+
+                    <td>
+                        <span class="badge {{ incident['severity']|lower }}">
+                            {{ incident["severity"] }}
+                        </span>
+                    </td>
+
+                    <td>{{ incident["priority_score"] }}</td>
+                    <td>{{ incident["incident_status"] }}</td>
+                    <td>{{ incident["assigned_to"] }}</td>
+
+                    <td>
+                        <form action="{{ url_for('update_status', incident_id=incident['incident_id']) }}"
+                              method="POST">
+                            <select name="status">
+                                <option value="Open">Open</option>
+                                <option value="Investigating">Investigating</option>
+                                <option value="Resolved">Resolved</option>
+                            </select>
+                            <button type="submit">Update</button>
+                        </form>
+
+                        <form action="{{ url_for('assign_incident', incident_id=incident['incident_id']) }}"
+                              method="POST">
+                            <input type="text" name="analyst"
+                                   placeholder="Analyst name" required>
+                            <button type="submit">Assign</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9">No incidents found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</main>
+
+<footer>
+    <p>AI-Powered SOC Platform | Phase 5</p>
+</footer>
+
+</body>
+</html>
